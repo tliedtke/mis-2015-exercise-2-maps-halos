@@ -3,15 +3,21 @@ package com.example.mmbuw.hellomaps;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
+    private LatLng myPos = new LatLng(54, 11);
+    private ArrayList<Circle> circleArrayList = new ArrayList<Circle>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +65,27 @@ public class MapsActivity extends FragmentActivity {
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
+
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(54, 12)).title("Marker"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(54.0213, 12.3454)).title("MyPosition"));
+        ArrayList<MarkerOptions> markerOptionses = new ArrayList<MarkerOptions>();
+        markerOptionses.add(new MarkerOptions().position(new LatLng(54.032313, 12.4754)).title("Rest1"));
+        markerOptionses.add(new MarkerOptions().position(new LatLng(54.157813, 12.3044)).title("Rest2"));
+        markerOptionses.add(new MarkerOptions().position(new LatLng(54.02343, 12.2474)).title("Rest3"));
+
+        for(MarkerOptions m : markerOptionses) {
+            mMap.addMarker(m);
+            Circle c = DrawCircleOnMap.draw(mMap,null,m.getPosition());
+            circleArrayList.add(c);
+        }
+
+
+        //LatLngBounds Test = new LatLngBounds(
+          //      new LatLng(53, 8), new LatLng(56, 12));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(54.0213, 12.3454), 12));
+       // LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+        mMap.setOnCameraChangeListener(new CameraChangeListener(mMap, circleArrayList));
     }
+
+
 }
