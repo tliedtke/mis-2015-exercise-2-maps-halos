@@ -1,5 +1,9 @@
 package com.example.mmbuw.hellomaps;
 
+import android.content.Context;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -13,7 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapLongClickListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private LatLng myPos = new LatLng(54, 11);
@@ -23,6 +27,14 @@ public class MapsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+        mMap.setOnMapLongClickListener(this);
+    }
+
+
+
+    @Override
+    public void onMapLongClick(LatLng point) {
+        mMap.addMarker(new MarkerOptions().position(point).title("New Marker"));
     }
 
     @Override
@@ -67,11 +79,23 @@ public class MapsActivity extends FragmentActivity {
      */
 
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(54.0213, 12.3454)).title("MyPosition"));
+        mMap.setMyLocationEnabled(true);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        String provider = locationManager.getBestProvider(criteria, true);
+        Location myLocation = locationManager.getLastKnownLocation(provider);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        double latitude = myLocation.getLatitude();
+        double longitude = myLocation.getLongitude();
+        LatLng latLng = new LatLng(latitude, longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).title("MyPosition"));
         ArrayList<MarkerOptions> markerOptionses = new ArrayList<MarkerOptions>();
-        markerOptionses.add(new MarkerOptions().position(new LatLng(54.032313, 12.4754)).title("Rest1"));
-        markerOptionses.add(new MarkerOptions().position(new LatLng(54.157813, 12.3044)).title("Rest2"));
-        markerOptionses.add(new MarkerOptions().position(new LatLng(54.02343, 12.2474)).title("Rest3"));
+       // markerOptionses.add(new MarkerOptions().position(point).title("New Marker"));
+        markerOptionses.add(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).title("MyPosition"));
+        markerOptionses.add(new MarkerOptions().position(new LatLng(latLng.latitude+0.05, latLng.longitude-0.05)).title("Rest2"));
+        markerOptionses.add(new MarkerOptions().position(new LatLng(latLng.latitude-0.05, latLng.longitude-0.05)).title("Rest3"));
 
         for(MarkerOptions m : markerOptionses) {
             mMap.addMarker(m);
@@ -82,7 +106,7 @@ public class MapsActivity extends FragmentActivity {
 
         //LatLngBounds Test = new LatLngBounds(
           //      new LatLng(53, 8), new LatLng(56, 12));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(54.0213, 12.3454), 12));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLng.latitude, latLng.longitude), 12));
        // LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
         mMap.setOnCameraChangeListener(new CameraChangeListener(mMap, circleArrayList));
     }
